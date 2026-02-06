@@ -1,0 +1,116 @@
+//Main class:
+
+import java.util.ArrayList;
+
+public class App {
+	public static void main(String[] args) {
+        ArrayList<Payable> paymentQueue = new ArrayList<>();
+        
+        //Adding one queue for each a credit card and meal plan; no base constructors were in the classes
+        paymentQueue.add(new CreditCard("Jack", 100.0, 200.0));
+        
+        paymentQueue.add(new MealPlan("Mary", 75.0));
+        
+        for (int i = 0; i < paymentQueue.size(); i++) {
+            paymentQueue.get(i).processPayment(50.0);
+        }
+        
+        System.out.println("Total transactions: " + PaymentMethod.totalTransactions);
+	}
+}
+
+//interface Payable class:
+
+interface Payable{
+    
+    void processPayment(double amount);
+    
+    String getPaymentStatus();
+}
+
+//PaymentMethod class:
+
+public abstract class PaymentMethod implements Payable {
+    
+    protected String accountHolder;
+    protected double balance;
+    protected static int totalTransactions = 0; //Keeping track of all my payments across the entire system
+    
+    //Problem doesn't state to add a base constructor with no parameters for values to substitute
+    
+    public PaymentMethod(String accountHolder, double balance) {
+        this.accountHolder = accountHolder;
+        this.balance = balance;
+    }
+    
+    protected abstract void validateAccount();
+}
+
+//CreditCard class:
+
+public class CreditCard extends PaymentMethod {
+    
+    private double creditLimit;
+    
+    public CreditCard(String accountHolder, double balance, double creditLimit) {
+        super(accountHolder, balance);
+        this.creditLimit = creditLimit;
+    }
+    
+    @Override
+    protected void validateAccount() { //The previous abstract method
+    }
+    
+    @Override
+    public void processPayment(double amount) {
+        validateAccount(); 
+
+        if (amount > (balance + creditLimit)) {
+            System.out.println("Transaction Declined.");
+        } 
+        else {
+            balance -= amount;
+            totalTransactions++;
+        }
+    }
+    
+    @Override 
+    public String getPaymentStatus() {
+        return "Credit Card processed for " + accountHolder + ".";
+    }
+}
+
+//MealPlan class:
+
+public class MealPlan extends PaymentMethod {
+    
+    public MealPlan(String accountHolder, double balance) {
+        super(accountHolder, balance);
+    }
+    
+    @Override
+    protected void validateAccount() {
+        if (balance < 0) {
+            System.out.println("Meal plan balance cannot be negative.");
+            return;
+        }
+    }
+    
+    @Override
+    public void processPayment(double amount) {
+        validateAccount();
+
+        if (amount > balance) {
+            System.out.println("Transaction Declined.");
+        } 
+        else {
+            balance -= amount;
+            totalTransactions++;
+        }
+    }
+    
+    @Override 
+    public String getPaymentStatus() {
+        return "Meal Plan processed for " + accountHolder + ".";
+    }
+}
