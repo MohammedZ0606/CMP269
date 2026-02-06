@@ -1,0 +1,162 @@
+Main method:
+
+import java.util.ArrayList;
+
+public class App2 {
+    public static void main(String[] args) {
+        
+        ArrayList<SmartDevice> homeHub = new ArrayList<>();
+        
+        SmartLight livingRoom = new SmartLight("Living Room");
+        SmartLight kitchen = new SmartLight("Kitchen");
+        SmartThermostat hallwayThermostat = new SmartThermostat("Hallway");
+        
+        homeHub.add(livingRoom);
+        homeHub.add(kitchen);
+        homeHub.add(hallwayThermostat);
+        
+        livingRoom.turnOn();
+        hallwayThermostat.turnOn();
+        
+        kitchen.setLevel(75); // We don't turn on kitchen so this fails and only 2 devices were running
+        
+        System.out.println("Active devices: " + SmartDevice.activeDevicesCount);
+        
+        for (int i = 0; i < homeHub.size(); i++) {
+            homeHub.get(i).performSelfDiagnostic();
+        }
+    }
+}
+
+interface Powerable class:
+
+public interface Powerable {
+    void turnOn();
+    void turnOff();
+}
+
+interface Adjustable class:
+
+public interface Adjustable {
+    void setLevel(int level); //level for the brightness as stated
+}
+
+SmartDevice class:
+
+public abstract class SmartDevice implements Powerable {
+    
+    protected String deviceName;
+    protected boolean isOn;
+    protected static int activeDevicesCount = 0;
+    
+    public SmartDevice(String deviceName) {
+        this.deviceName = deviceName;
+        this.isOn = false;
+    }
+    
+    protected abstract void performSelfDiagnostic();
+}
+
+SmartLight Class:
+
+public class SmartLight extends SmartDevice implements Adjustable {
+    private int brightness;
+    
+    public SmartLight(String deviceName){
+        super(deviceName);
+        brightness = 0;
+    }
+    
+    @Override
+    public void turnOn() {
+        if (isOn == false) {
+            isOn = true;
+            activeDevicesCount++;
+        }
+    }
+
+    @Override
+    public void turnOff() {
+        if (isOn == true) {
+            isOn = false;
+            activeDevicesCount--;
+        }
+    }
+    
+    @Override
+    public void setLevel(int level) {
+        if (isOn == false) {
+            System.out.println("Cannot adjust: Device is OFF.");
+            return;
+        }
+
+        if (level <= 0) {
+            brightness = 0;
+        } 
+        else if (level >= 100) {
+            brightness = 100;
+        } 
+        else {
+            brightness = level;
+        }
+    }
+    
+    @Override
+    protected void performSelfDiagnostic() {
+        System.out.println("Checking LED health...");
+    }
+}
+
+SmartThermostat Class:
+
+public class SmartThermostat extends SmartDevice implements Adjustable {
+    
+    private int temperature;
+    
+    public SmartThermostat(String deviceName) {
+        super(deviceName);
+        this.temperature = 70; //default since its in between 60 and 80
+    }
+    
+    @Override
+    public void turnOn() { // Problem requires to call super.turnOn BUT the super is SmartDevice and it does not implement turnOn
+        System.out.println("HVAC System Starting...");
+        //super.turnOn(); This becomes an error because of the circumstances
+        if (isOn == false) {
+            isOn = true;
+            activeDevicesCount++;
+        }
+    }
+    
+    @Override
+    public void turnOff() {
+        //super.turnOff(); This becomes an error because of the circumstances
+        if (isOn == true) {
+            isOn = false;
+            activeDevicesCount--;
+        }
+    }
+    
+    @Override
+    public void setLevel(int level) {
+        if (isOn == false) {
+            System.out.println("Cannot adjust: Device is OFF.");
+            return;
+        }
+
+        if (level <= 60) {
+            temperature = 60;
+        } 
+        else if (level >= 80) {
+            temperature = 80;
+        } 
+        else {
+            temperature = level;
+        }
+    }
+    
+    @Override
+    protected void performSelfDiagnostic() {
+        System.out.println("Checking temperature sensors...");
+    }
+}
