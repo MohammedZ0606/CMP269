@@ -1,0 +1,45 @@
+Processor file:
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class Processor {
+    public static void main(String[] args) {
+	    try (Scanner scnr = new Scanner(new File("students.txt"))) {
+            try (PrintWriter printwriter = new PrintWriter("grades_report.txt")) {
+                while (scnr.hasNextLine()) {
+                    String currentline = scnr.nextLine();
+                    Scanner lineScanner = new Scanner(currentline);
+                    try {
+                        String studentName = lineScanner.next();
+                        int s1 = Integer.parseInt(lineScanner.next());
+                        int s2 = Integer.parseInt(lineScanner.next());
+                        int s3 = Integer.parseInt(lineScanner.next());
+                        printwriter.printf("%s | Average: %.2f%n", studentName, (s1 + s2 + s3) / 3.0);
+                    } 
+                    catch (NumberFormatException e) {
+                        System.out.println("Invalid value found, skipping line #" + currentline);
+                    }
+                    lineScanner.close();
+                }
+
+            }
+        }
+        catch (FileNotFoundException e) {
+            System.out.println("The student.txt file is not found.");
+        }
+        finally {
+            System.out.println("The processing is complete");
+        }
+	}
+}
+
+students.txt file:
+
+Alice_Smith 85 90 78
+Rick_Lee 100 82 92
+Life_Zeelow 76 Error 47
+Lufess_Dejames 99 82 79
+Aura_Kayla 85 90 89
