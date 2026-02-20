@@ -1,0 +1,62 @@
+package AppPackage;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+
+public class RegistrationApp extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setVgap(10);
+        grid.setHgap(10);
+        
+        Label studentName = new Label("Student Name:");
+        Label courseName = new Label("Course Code:");
+        Label currentText = new Label();
+
+        TextField nameBox = new TextField();
+        nameBox.setPromptText("Enter your name.");
+
+        ComboBox<String> coursesBox = new ComboBox<>();
+        coursesBox.getItems().addAll("CMP 167", "CMP 168", "CMP 269", "CMP 338");
+        coursesBox.setPromptText("Select your course.");
+        
+        Button registerButton = new Button("Register");
+        
+        registerButton.setOnAction(e -> {
+            String name = nameBox.getText();
+            String course = coursesBox.getValue();
+
+            if ((name.isEmpty()) || (course == null)) {
+            	currentText.setText("Enter your name and select a course.");
+            } 
+            else {
+            	currentText.setText(
+                        name + " has been registered for " + course + "."
+                );
+            }
+        });
+        
+        grid.add(studentName, 0, 0);
+        grid.add(nameBox, 1, 0);
+        grid.add(courseName, 0, 1);
+        grid.add(coursesBox, 1, 1);
+        grid.add(registerButton, 1, 2);
+        grid.add(currentText, 1, 3);
+
+        Scene scene = new Scene(grid, 400, 250);
+        primaryStage.setTitle("Lehman Course Registration");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
