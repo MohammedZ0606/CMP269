@@ -1,0 +1,207 @@
+//Main Thread with running all the exercises:
+
+package GreetingPackage;
+
+public class MainThreads {
+
+    public static void main(String[] args) {
+    	
+    	//Exercise #1
+    	
+        GreeterTask task = new GreeterTask();
+
+        Thread t1 = new Thread(task, "Lehman-Thread-1");
+        Thread t2 = new Thread(task, "Lehman-Thread-2");
+
+        t1.start();
+        t2.start();
+        
+        try {
+            t1.join();
+        } 
+        catch (InterruptedException e) {
+            System.out.println("Error in termination of thread " + t1.getName());
+        }
+        
+        //Exercise #2
+        
+        ThreadStates stateThread = new ThreadStates();
+        
+        Thread t3 = new Thread(stateThread, "Check-Thread-States");
+        
+        System.out.println("Pre-start State: " + t3.getState());
+        
+        t3.start();
+        
+        System.out.println("Post-start State: " + t3.getState());
+        
+        try {
+        	Thread.sleep(500);
+        }
+        catch (InterruptedException e) {
+			System.out.println("Error in thread " + t3.getName());
+		}
+        
+        System.out.println("Sleep State: " + t3.getState());
+        
+        try {
+            t3.join();
+        } 
+        catch (InterruptedException e) {
+            System.out.println("Error in termination of thread " + t3.getName());
+        }
+        
+        System.out.println("Post-sleep State: " + t3.getState());
+        
+        //Exercise #3
+
+        BankAccount acc = new BankAccount();
+        WithdrawTask t4 = new WithdrawTask(acc);
+
+        Thread husband = new Thread(t4, "Husband");
+        Thread wife = new Thread(t4, "Wife");
+
+        husband.start();
+        wife.start();
+
+        try {
+            husband.join();
+            wife.join();
+        } 
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        //Exercise #4
+        
+        HeavyCalculationThread t5 = new HeavyCalculationThread();
+        Thread calcThread = new Thread(t5, "Calc-Thread");
+
+        calcThread.start();
+
+        try {
+            calcThread.join();
+        } 
+        catch (InterruptedException e) {
+            System.out.println("Error in Calculation Thread...");
+        }
+
+        System.out.println("Calculation Results: " + t5.getResult());
+    }
+}
+
+//Exercise #1:
+
+package GreetingPackage;
+
+public class GreeterTask implements Runnable {
+
+    @Override
+    public void run() {
+        String name = Thread.currentThread().getName();
+
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Hello from " + name);
+            try {
+                Thread.sleep(500); //500 milliseconds
+            } 
+            catch (InterruptedException e) {
+                System.out.println("Error in thread " + name);
+            }
+        }
+    }
+}
+
+//Exercise #2:
+
+package GreetingPackage;
+
+public class ThreadStates implements Runnable {
+	
+	@Override
+    public void run() {
+		
+		String name = Thread.currentThread().getName();
+		
+		try {
+			Thread.sleep(2000);
+		}
+		catch (InterruptedException e) {
+			System.out.println("Error in thread " + name);
+		}
+	}
+}
+
+Exercise #3:
+
+package GreetingPackage;
+
+public class BankAccount {
+
+    private int bal = 1000;
+
+    public void withdraw(int amount) {
+
+        String name = Thread.currentThread().getName();
+
+        if (bal >= amount) {
+        	System.out.println(name + " is withdrawing cash.");
+            try {
+                Thread.sleep(500);
+            } 
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+            bal -= amount;
+        } 
+        else {
+            System.out.println(name + " has insufficient funds.");
+        }
+        
+        System.out.println(name + "'s current balance is $" + bal);
+        
+    }
+}
+
+
+package GreetingPackage;
+
+public class WithdrawTask implements Runnable {
+
+    private BankAccount acc;
+
+    public WithdrawTask(BankAccount acc) {
+        this.acc = acc;
+    }
+
+    @Override
+    public void run() {
+        acc.withdraw(700);
+    }
+}
+
+//Exercise #4:
+
+package GreetingPackage;
+
+public class HeavyCalculationThread implements Runnable {
+
+    private long result = 0;
+
+    @Override
+    public void run() {
+
+        System.out.println("Starting calculation: ");
+
+        for (long i = 1; i <= 1_000_000_000L; i++) {
+            result += i;
+        }
+
+        System.out.println("Calculation completed.");
+    }
+
+    public long getResult() {
+        return result;
+    }
+}
