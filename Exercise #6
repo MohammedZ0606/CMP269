@@ -1,0 +1,83 @@
+// LehmanGradeBook:
+
+public class LehmanGradeBook {
+
+    public boolean isPassing(int grade) {
+    	
+        validateGrade(grade);
+        return (grade >= 70);
+        
+    }
+
+    public char getLetterGrade(int score) {
+    	
+        validateGrade(score);
+
+        if (score >= 90) {
+        	return 'A';
+        }
+        else if (score >= 80) {
+        	return 'B';
+        }
+        else if (score >= 70) {
+        	return 'C';
+        }
+        else if (score >= 60) {
+        	return 'D';
+        }
+        else {
+        	return 'F';
+        }
+    }
+
+    private void validateGrade(int grade) {
+        if (grade < 0 || grade > 100) {
+            throw new IllegalArgumentException("Grade must be between 0 and 100.");
+        }
+    }
+}
+
+// LehmanGradeBookTest:
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class LehmanGradeBookTest {
+
+    @Test
+    @DisplayName("Grade 70 should return true for passing")
+    void testPassing() {
+        LehmanGradeBook gb = new LehmanGradeBook();
+        assertTrue(gb.isPassing(70), "A grade of 70 should pass.");
+    }
+
+    @Test
+    void testGradeA() {
+        LehmanGradeBook gb = new LehmanGradeBook();
+        assertEquals('A', gb.getLetterGrade(95));
+    }
+    
+    @Test
+    void testBoundaries() {
+        LehmanGradeBook gb = new LehmanGradeBook();
+        assertEquals('A', gb.getLetterGrade(90));
+        assertEquals('B', gb.getLetterGrade(80));
+        assertEquals('C', gb.getLetterGrade(70));
+    }
+
+    @Test
+    void testGradeF() {
+        LehmanGradeBook gb = new LehmanGradeBook();
+        assertEquals('F', gb.getLetterGrade(50));
+    }
+
+    @Test
+    void testExceptions() {
+        LehmanGradeBook gb = new LehmanGradeBook();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            gb.isPassing(150);
+        });
+    }
+}
