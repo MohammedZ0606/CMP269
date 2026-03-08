@@ -1,0 +1,187 @@
+// ChatClient:
+
+package ChatPackage;
+
+import java.net.Socket;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+public class ChatClient {
+	
+    public static void main(String[] args) {
+    	
+        try {
+            Socket host = new Socket("localhost", 59001);
+            
+            System.out.println("Successfully connected to server.");
+            
+            Scanner server = new Scanner(host.getInputStream());
+            Scanner client = new Scanner(System.in);
+            PrintWriter output = new PrintWriter(host.getOutputStream(), true);
+            
+            Thread messageListen = new Thread(() -> {
+                while (server.hasNextLine()) {
+                    String msg = server.nextLine();
+                    System.out.println(msg);
+                }
+            });
+
+            messageListen.start();
+            
+            while (client.hasNextLine()) {
+                String msg = client.nextLine();
+                output.println(msg);
+            }
+
+            host.close();
+            client.close();
+            server.close();
+
+        } 
+        catch (Exception e) {
+            System.out.println("Error connecting to server.");
+            e.printStackTrace();
+        }
+    }
+}
+
+// ChatClientUI: 
+
+package ChatPackage;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
+import java.net.Socket;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+public class ChatClientUI extends Application {
+
+    public TextArea chatArea;
+    public TextField msgField;
+    public TextField ipField;
+
+    public PrintWriter output;
+    public Scanner server;
+    public Socket socket;
+
+    private boolean hasName = false;
+    private String userName = "";
+
+    public void start(Stage primaryStage) {
+
+        ipField = new TextField("localhost");
+        ipField.setPromptText("Server IP");
+
+        Button connect = new Button("Connect");
+
+        chatArea = new TextArea();
+        chatArea.setEditable(false);
+
+        msgField = new TextField();
+        msgField.setPromptText("Enter username first...");
+
+        Button send = new Button("Send");
+
+        // Top section (IP + Connect)
+        HBox topBox = new HBox(ipField, connect);
+
+        // Bottom section (Message field + Send button)
+        HBox bottomBox = new HBox(msgField, send);
+
+        // BorderPane layout
+        BorderPane root = new BorderPane();
+        root.setTop(topBox);
+        root.setCenter(chatArea);
+        root.setBottom(bottomBox);
+
+        Scene scene = new Scene(root, 400, 350);
+
+        primaryStage.setTitle("Chat Client");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        connect.setOnAction(e -> connect());
+
+        send.setOnAction(e -> sendMessage());
+        msgField.setOnAction(e -> sendMessage());
+
+        primaryStage.setOnCloseRequest(e -> shutdown());
+    }
+
+    public void connect() {
+        try {
+
+            socket = new Socket(ipField.getText(), 59001);
+
+            output = new PrintWriter(socket.getOutputStream(), true);
+            server = new Scanner(socket.getInputStream());
+
+            chatArea.appendText("Connected to server\n");
+            
+            chatArea.appendText("SERVER: Enter your name...");
+
+            Thread messageListen = new Thread(() -> {
+
+                while (server.hasNextLine()) {
+
+                    String msg = server.nextLine();
+
+                    Platform.runLater(() -> {
+                        chatArea.appendText(msg + "\n");
+                    });
+                }
+            });
+
+            messageListen.start();
+
+        } 
+        catch (Exception e) {
+            chatArea.appendText("Error: Connection Failed...\n");
+        }
+    }
+
+    public void sendMessage() {
+
+        String msg = msgField.getText();
+
+        if (!msg.isEmpty()) {
+            if (hasName == false) {
+                output.println("\n" + msg + " has joined the chat!");
+                userName = msg;
+                hasName = true;
+                msgField.setPromptText("Type messages...");
+            } 
+            else {
+
+                if (msg.equalsIgnoreCase("QUIT")) {
+                    shutdown();
+                    return;
+                }
+
+                output.println(userName + ": " + msg);
+            }
+
+            msgField.clear();
+        }
+    }
+
+    public void shutdown() {
+        try {
+            if (socket != null) {
+            	socket.close();
+            }
+        } 
+        catch (Exception e) {}
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
