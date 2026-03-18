@@ -1,0 +1,8 @@
+1)
+
+fun main() {
+  val studentName: String = "Mohammed"
+  val middleName: String? = null
+
+  println("Welcome, $studentName ${middleName ?: "No Middle Name"}!")
+}
