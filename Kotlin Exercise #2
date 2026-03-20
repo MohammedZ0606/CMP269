@@ -1,1 +1,66 @@
-Working on exercise #2 right now
+1) 
+
+data class WebResponse(
+  val statusCode: Int,
+  val statusMessage: String,
+  val body: String?
+)
+
+fun main() {
+  val success = WebResponse(
+    statusMessage = "OK",
+    statusCode = 200,
+    body = "Success!"
+  )
+  val error = WebResponse(
+    statusMessage = "Not Found",
+    statusCode = 404,
+    body = null
+  )
+    
+  println(success)
+  println(error)
+}
+
+2) 
+
+fun describeStatus(code: Int): String {
+  return when (code) {
+    in 200..299 -> "Success: The request was fulfilled."
+    in 400..499 -> "Client Error: Check your URL or parameters."
+    in 500..599 -> "Server Error: The Lehman Server is having trouble."
+    else -> "Unknown status code."
+  }
+}
+
+fun main() {
+  println(describeStatus(201))
+  println(describeStatus(404))
+  println(describeStatus(503))
+  println(describeStatus(600))
+}
+
+3)
+
+fun routeRequest(path: String, user: String?): String {
+  return when (path) {
+    "/home" -> "Welcome to the Lehman Homepage, ${user ?: "Guest"}!"
+    "/grades" -> {
+      if (user == null) {
+        "Error: Unauthorized access to grades."
+      }
+      else {
+        "Loading grades for $user..."
+      }
+    }
+    else -> "404: Path $path not found."
+  }
+}
+
+fun main() {
+  println(routeRequest("/home", "Magic"))
+  println(routeRequest("/home", null))
+  println(routeRequest("/grades", "Random"))
+  println(routeRequest("/grades", null))
+  println(routeRequest("/random", "Jack"))
+}
