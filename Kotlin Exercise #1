@@ -6,3 +6,49 @@ fun main() {
 
   println("Welcome, $studentName ${middleName ?: "No Middle Name"}!")
 }
+
+2)
+
+data class Laptop(val brand: String, val ramGB: Int)
+
+fun Int.toLehmanGigabytes(): String {
+    return "$this GB (Lehman Standard)"
+}
+
+fun main() {
+    val l1 = Laptop("Dell", 16)
+    val l2 = Laptop("Apple", 8)
+
+    println("${l1.brand} RAM: ${l1.ramGB.toLehmanGigabytes()}")
+    println("${l2.brand} RAM: ${l2.ramGB.toLehmanGigabytes()}")
+}
+
+3)
+
+sealed class EnrollmentStatus {
+    data class Success(val courseCode: String) : EnrollmentStatus()
+    data class Error(val message: String) : EnrollmentStatus()
+    object Loading : EnrollmentStatus()
+}
+
+fun printStatus(status: EnrollmentStatus) {
+    when (status) {
+        is EnrollmentStatus.Success -> {
+            println("Successfully enrolled in ${status.courseCode}")
+        }
+        is EnrollmentStatus.Error -> {
+            println("ERROR, Enrollment failed: ${status.message}")
+        }
+        EnrollmentStatus.Loading -> {
+            println("Enrolling...")
+        }
+    }
+}
+
+fun main() {
+    val success = EnrollmentStatus.Success("CMP269")
+    val error = EnrollmentStatus.Error("The course is full.")
+
+    printStatus(success)
+    printStatus(error)
+}
