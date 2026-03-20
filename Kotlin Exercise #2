@@ -1,15 +1,1 @@
-2)
-
-data class Laptop(val brand: String, val ramGB: Int)
-
-fun Int.toLehmanGigabytes(): String {
-    return "$this GB (Lehman Standard)"
-}
-
-fun main() {
-    val l1 = Laptop("Dell", 16)
-    val l2 = Laptop("Apple", 8)
-
-    println("${l1.brand} RAM: ${l1.ramGB.toLehmanGigabytes()}")
-    println("${l2.brand} RAM: ${l2.ramGB.toLehmanGigabytes()}")
-}
+Working on exercise #2 right now
