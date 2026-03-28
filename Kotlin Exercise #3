@@ -1,1 +1,155 @@
-In progress, will finish by 3/27/26
+Dependencies:
+
+plugins {
+    kotlin("jvm") version "2.0.0"
+    application
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("io.ktor:ktor-server-core:2.3.7")
+    implementation("io.ktor:ktor-server-netty:2.3.7")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
+
+1) Browser search: http://localhost:8080/
+
+package com.example
+
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            get("/") {call.respondText("Server is online at Lehman College.")}
+        }
+    }.start(wait = true)
+}
+
+2) Browser search: localhost:8080/greet/Mohammed
+
+package com.example
+
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            get("/") {call.respondText("Server is online at Lehman College.")}
+
+            get("/greet/{name}") {
+                val name = call.parameters["name"]
+                call.respondText("Hello, $name! Welcome to CMP 269.")
+            }
+        }
+    }.start(wait = true)
+}
+
+3) Browser search: http://localhost:8080/grade/123
+
+package com.example
+
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.http.*
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        routing {
+
+            // "Database"
+            val grades = mapOf(
+                "123" to 95,
+                "456" to 82
+            )
+            //example 1
+            get("/") {call.respondText("Server is online at Lehman College.")}
+            //example 2
+            get("/greet/{name}") {
+                val name = call.parameters["name"]
+                call.respondText("Hello, $name! Welcome to CMP 269.")
+            }
+            //example 3
+            get("/grade/{studentId}") {
+                val studentId = call.parameters["studentId"]
+                val grade = grades[studentId]
+                
+                if (grade != null) {
+                    call.respondText("Student $studentId grade: $grade")
+                } 
+                else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Student not found"
+                    )
+                }
+            }
+        }
+    }.start(wait = true)
+}
+
+4)
+
+// Just add this line and make the static folder
+import io.ktor.server.http.content.*
+staticResources("/static", "static")
+
+5) Had a little trouble with this one
+
+package com.example
+
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.http.content.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.http.*
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Stock(val symbol: String, val price: Double)
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            json()
+        }
+        routing {
+            get("/api/stock/{symbol}") {
+                val symbol = call.parameters["symbol"]
+
+                if (symbol == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Missing symbol")
+                    return@get
+                }
+
+                val stock = Stock(symbol, 150.25)
+                call.respond(stock)
+            }
+        }
+    }.start(wait = true)
+}
