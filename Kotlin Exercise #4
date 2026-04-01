@@ -1,1 +1,76 @@
-In progress, will be finished by the end of 4 - 1 - 26
+1: QR Code Generator for email
+
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import java.nio.file.FileSystems
+
+fun saveQRCode(content: String, fileName: String) {
+    val qrCode = QRCodeWriter()
+    val matrix = qrCode.encode(content, BarcodeFormat.QR_CODE, 400, 400)
+    val codePath = FileSystems.getDefault().getPath(fileName)
+
+    MatrixToImageWriter.writeToPath(matrix, "PNG", codePath)
+}
+
+fun main() {
+    val email = "mohammed.zaman1@lc.cuny.edu"
+
+    saveQRCode(email, "my_email.png")
+    println("The QR code has been saved as email")
+}
+
+2:
+
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import java.io.ByteArrayOutputStream
+
+fun generateQRCodeStream(content: String): ByteArrayOutputStream {
+    val qrCode = QRCodeWriter()
+    val matrix = qrCode.encode(content, BarcodeFormat.QR_CODE, 400, 400)
+    val output = ByteArrayOutputStream()
+    MatrixToImageWriter.writeToStream(matrix, "PNG", output)
+
+    return output
+}
+
+fun main() {
+    val email = "mohammed.zaman1@lc.cuny.edu"
+    val stream = generateQRCodeStream(email)
+    println("QR code generated in memory!")
+}
+
+3:
+
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.http.*
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import java.io.ByteArrayOutputStream
+
+fun Application.module() {
+    routing {
+        get("/qr") {
+            val text = call.request.queryParameters["text"]
+
+            if (text == null) {
+                call.respondText("Missing 'text' query parameter", status = HttpStatusCode.BadRequest)
+
+                return@get
+            }
+
+            val qrCode = QRCodeWriter()
+            val matrix = qrCode.encode(text, BarcodeFormat.QR_CODE, 400, 400)
+            val output = ByteArrayOutputStream()
+
+            MatrixToImageWriter.writeToStream(matrix, "PNG", output)
+            call.response.header(HttpHeaders.ContentType, "image/png")
+            call.respondBytes(output.toByteArray())
+        }
+    }
+}
