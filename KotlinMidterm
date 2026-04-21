@@ -1,0 +1,154 @@
+build.gradle.kts:
+
+plugins {
+    kotlin("jvm") version "1.9.24"
+    application
+    kotlin("plugin.serialization") version "1.9.24"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("io.ktor:ktor-server-core-jvm:2.3.12")
+    implementation("io.ktor:ktor-server-netty-jvm:2.3.12")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.12")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.12")
+
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:javase:3.5.3")
+
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+Main.kt:
+
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.http.content.*
+import kotlinx.serialization.Serializable
+//import com.google.zxing.BarcodeFormat
+//import com.google.zxing.client.j2se.MatrixToImageWriter
+//import com.google.zxing.qrcode.QRCodeWriter
+//import java.io.ByteArrayOutputStream
+import java.util.concurrent.ConcurrentHashMap
+
+@Serializable
+data class Student(
+    val id: String,
+    val name: String,
+    val major: String?,
+    val accessLevel: Int
+)
+
+fun main() {
+    val studentDb = ConcurrentHashMap<String, Student>().apply {
+        put("12345", Student("12345", "Alice Smith", "Computer Science", 5))
+        put("67890", Student("67890", "Bob Jones", null, 3))
+    }
+
+    embeddedServer(Netty, port = 8080) {
+        module(studentDb)
+    }.start(wait = true)
+}
+
+fun Application.module(studentDb: ConcurrentHashMap<String, Student>) {
+
+    install(ContentNegotiation) {
+        json()
+    }
+
+    routing {
+
+        // STATIC PORTAL
+
+        staticResources("/", "static") {
+            default("index.html")
+        }
+
+        // STUDENT API
+
+        get("/api/student/{id}") {
+            val id = call.parameters["id"]
+
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing student ID")
+                return@get
+            }
+
+            val student = studentDb[id]
+
+            if (student == null) {
+                call.respond(HttpStatusCode.NotFound, "Student is not found")
+                return@get
+            }
+            
+            val safeStudent = student.copy(
+                major = student.major ?: "Undeclared"
+            )
+
+            call.respond(safeStudent)
+        }
+
+        // QR GENERATOR
+
+        get("/generate-id") {
+            val sid = call.request.queryParameters["sid"]
+
+            if (sid.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing sid parameter")
+                return@get
+            }
+
+            val student = studentDb[sid]
+
+            if (student == null) {
+                call.respond(HttpStatusCode.NotFound, "Student is not found")
+                return@get
+            }
+
+            val payload = "ID=${student.id};Name=${student.name};Major=${student.major ?: "Undeclared"};Access=${student.accessLevel}"
+
+            val qrCode = QRGenerator.generate(payload)
+
+            call.response.header(HttpHeaders.ContentType, ContentType.Image.PNG.toString())
+            call.respondBytes(qrCode, ContentType.Image.PNG)
+
+        }
+    }
+}
+
+QRGenerator:
+
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.qrcode.QRCodeWriter
+import java.io.ByteArrayOutputStream
+
+object QRGenerator {
+
+    fun generate(text: String): ByteArray {
+        val writer = QRCodeWriter()
+        val matrix = writer.encode(text, BarcodeFormat.QR_CODE, 300, 300)
+
+        val stream = ByteArrayOutputStream()
+        MatrixToImageWriter.writeToStream(matrix, "PNG", stream)
+
+        return stream.toByteArray()
+    }
+}
