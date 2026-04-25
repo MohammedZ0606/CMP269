@@ -1,1 +1,39 @@
-In progress, will be finished by 4 / 24 / 26
+1:
+
+def exercise_1_basics():
+    course = "CMP 269"
+    students = 30
+
+    print(f"The course {course} has {students} students.")
+    
+exercise_1_basics()
+
+2:
+
+def exercise_2_collections():
+    colors = ["red", "blue", "green", "yellow", "black"]
+    colors.append("white")
+
+    student = {
+        "name": "Max",
+        "gpa": 3.75
+    }
+
+    print(colors)
+    print(student)
+
+exercise_2_collections()
+
+3:
+
+def exercise_3_logic():
+    nums = [1, 2, 3, 4, 5, 6]
+    even = []
+
+    for i in nums:
+        if i % 2 == 0:
+            even.append(i)
+
+    print(even)
+    
+exercise_3_logic()
