@@ -1,0 +1,63 @@
+from abc import ABC, abstractmethod
+
+class Payable(ABC):
+    @abstractmethod
+    def process_payment(self, amount):
+        pass
+
+    @abstractmethod
+    def get_payment_status(self):
+        pass
+
+
+class PaymentMethod(Payable):
+    transactions = 0
+
+    def __init__(self, account, balance):
+        self.account = account
+        self.balance = balance
+
+    @abstractmethod
+    def validate_account(self):
+        pass
+
+class CreditCard(PaymentMethod):
+    def __init__(self, account, balance, credit_limit):
+        super().__init__(account, balance)
+        self.credit_limit = credit_limit
+        self._status = "Not Processed"
+
+    def validate_account(self):
+        pass
+
+    def process_payment(self, amount):
+        if amount > (self.balance + self.credit_limit):
+            self._status = "Transaction Declined"
+        else:
+            self.balance -= amount
+            PaymentMethod.transactions += 1
+            self._status = "Payment Successful"
+
+    def get_payment_status(self):
+        return self._status
+
+
+class MealPlan(PaymentMethod):
+    def __init__(self, account, balance):
+        super().__init__(account, balance)
+        self._status = "Not Processed"
+
+    def validate_account(self):
+        if self.balance < 0:
+            raise ValueError("Balance cannot be negative for meal plan.")
+
+    def process_payment(self, amount):
+        if amount > self.balance:
+            self._status = "Insufficient Balance"
+        else:
+            self.balance -= amount
+            PaymentMethod.transactions += 1
+            self._status = "Payment Successful"
+
+    def get_payment_status(self):
+        return self._status
