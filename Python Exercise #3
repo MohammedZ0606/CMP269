@@ -1,1 +1,98 @@
-Will be finished by 5/6/26
+1)
+def task_1_append_logger():
+    shortNote = input("Enter a note: ")
+    
+    with open("session_log.txt", "a") as file:
+        file.write(note + "\n")
+        
+    print("\n--- Log History ---")
+    with open("session_log.txt", "r") as file:
+        print(file.read())
+
+2)
+def task_2_word_count_utility():
+    
+    text = "Knowledge is Power. Go Lightning! Python makes data easy."
+    
+    with open("lehman_motto.txt", "w") as file: #write
+        file.write(text)
+        
+    with open("lehman_motto.txt", "r") as file: #read
+        content = file.read()
+        
+    words = content.split()
+    
+    print(len(words))
+
+3)
+def task_3_api_status_checker():
+
+    import requests
+
+    myURL = "https://jsonplaceholder.typicode.com/posts/101"
+
+    try:
+        res = requests.get(myURL, timeout = 10)
+
+        if res.status_code == 200:
+            print(res.json()) #prints the data
+        elif res.status_code == 404:
+            print("Error: Post not found.") #error
+        else:
+            print(f"Error: Received status code {res.status_code}")
+
+    except requests.exceptions.Timeout:
+        print("Request timed out.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+4)
+def task_4_data_filtering():
+
+    import requests
+
+    myURL = "https://jsonplaceholder.typicode.com/users"
+
+    try:
+        res = requests.get(myURL, timeout = 10)
+        res.raise_for_status()
+
+        users = res.json()
+
+        for user in users:
+            suite = user.get("address", {}).get("suite", "")
+            if "Suite" in suite:
+                print(user.get("name"))
+
+    except requests.exceptions.Timeout:
+        print("Request timed out.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+5)
+def task_5_integration_report():
+
+    import requests
+
+    myURL = "https://jsonplaceholder.typicode.com/posts/1"
+
+    try:
+        res = requests.get(myURL, timeout = 10)
+        res.raise_for_status()
+
+        myData = res.json()
+
+        title = myData.get("title", "")
+        body = myData.get("body", "")
+
+        with open("api_report.txt", "w") as file:
+            file.write("API REPORT\n")
+            file.write("===========\n\n")
+            file.write(f"Title: {title}\n\n")
+            file.write(f"Body:\n{body}\n")
+            
+    except requests.exceptions.Timeout:
+        print("Request timed out.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
