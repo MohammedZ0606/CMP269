@@ -1,1 +1,69 @@
+1)
+def task_1_series_creation():
+
+    import pandas as pd
+
+    schoolBuildings = {
+        "Gillet": 4,
+        "Carman": 3,
+        "Music": 3,
+        "Library": 4
+    }
+
+    series = pd.Series(schoolBuildings)
+    print(series)
+
+2)
+def task_2_dataframe_creation():
+
+    import pandas as pd
+
+    allData = {
+        "CourseCode": ["CMP168", "CMP269", "CMP338"],
+        "Credits": [4, 4, 4],
+        "Enrolled": [25, 30, 20]
+    }
+
+    dataFrame = pd.DataFrame(allData)
+    print(dataFrame)
+
+3)
+def task_3_data_manipulation():
+
+    import pandas as pd
+
+    allData = {
+        "CourseCode": ["CMP168", "CMP269", "CMP338"],
+        "Credits": [4, 4, 4],
+        "Enrolled": [25, 30, 20]
+    }
+
+    dataFrame = pd.DataFrame(allData)
+    print(dataFrame)
+    
+    filteredData = dataFrame[dataFrame["Enrolled"] > 20]
+    
+    print("Filtered Courses (>20 students):")
+    
+    print(filteredData)
+    
+    totalStudents = dataFrame["Enrolled"].sum()
+    
+    print("\nTotal Students:", totalStudents)
+
+4)
+def task_4_csv_integration():
+    
+    import pandas as pd
+
+    dataFrame = pd.DataFrame({
+        "Symbol": ["SPL", "KLA", "TVE"],
+        "Price": [152.82, 900.50, 386.20]
+    })
+    
+    dataFrame.to_csv("stocks.csv", index = False)
+    
+    frameLoaded = pd.read_csv("stocks.csv")
+    
+    print(frameLoaded)
 
